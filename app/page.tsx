@@ -7,21 +7,62 @@ import Swal from "sweetalert2";
 export default function Home() {
 
   const [horario, setHorario] = useState("")
-  const [data, setData] = useState("")
+  const [datas, setDatas] = useState("")
   const [corte, setCorte] = useState("")
+  const [nome, setNome] = useState("")
 
   async function enviarPedido(){
 
-    console.log(horario, data, corte)
-
-    if(!horario || !data || !corte){
+    if(!nome.trim() || !horario.trim() || !datas.trim() || !corte.trim()){
       Swal.fire({
         title: "Atenção!",
         text: "Por favor, preencha todos os campos.",
         icon: "warning",
         confirmButtonColor: "#b45309"
       })
+      return;
     }
+
+   const response = await fetch("http://localhost:3001/cortes", {
+    method: "POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body: JSON.stringify({
+      nome,
+      horario,
+      datas,
+      corte
+    })
+   })
+
+   const resultado = await response.json();
+
+   if(response.ok){
+    Swal.fire({
+          title: 'Sucesso!',
+          text: 'Agendamento realizado com sucesso!',
+          icon: "success"
+        });
+
+        setCorte("")
+        setDatas("")
+        setNome("")
+        setHorario("")
+
+  
+   }else{
+    Swal.fire({
+          title: 'Erro!',
+          text: resultado.mensagem || 'Falha ao salvar agendamento.',
+          icon: "error"
+        });
+      
+   }
+
+    console.log(nome, horario, datas, corte)
+
+    
 
   }
 
@@ -34,9 +75,13 @@ export default function Home() {
       <div className="flex items-center justify-center mt-16">
         <div className="w-full max-w-md grid grid-cols-1 bg-stone-300 p-10 dark:bg-zinc-600 gap-3 rounded">{/*Div contendo os inputs*/}
         <h2 className="font-bold">Agende aqui seu corte aqui</h2>
+        <label>Nome</label>
+        <input className= "border border-zinc-200 rounded p-1" type="text" onChange={(e)=>{
+          setNome(e.target.value)
+        }}/>
         <label>Data</label>
         <input className= "border border-zinc-200 rounded p-1" type="date" onChange={(e)=>{
-          setData(e.target.value)
+          setDatas(e.target.value)
         }}/>
         <label>Horário</label>
         <input className= "border border-zinc-200 rounded p-1" type="time" onChange={(e)=>{
